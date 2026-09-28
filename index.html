@@ -3,26 +3,30 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Messagerie - Contacts</title>
+    <title>Accueil</title>
 </head>
 
 <body>
-    <header>
-        <h1>Messagerie</h1>
-        <a href="login.html">Connexion</a>
-    </header>
+    <h1>Bienvenue sur la messagerie</h1>
+    <p>Connectez-vous pour accéder à vos conversations</p>
 
-    <h2>Discussions récentes</h2>
-    <ul>
-        <li>
-            <strong>Bryan</strong> - <em>Salut</em>
-            </a>
-        </li>
-        <li>
-            <strong>Redouane</strong> - <em>Salut</em>
-            </a>
-        </li>
-    </ul>
+    <form action="conversation.html" method="post">
+        <label for="pseudo">Pseudo :</label>
+        <input type="text" id="pseudo" name="pseudo" required>
+        <br>
+        <label for="mdp">Mot de passe :</label>
+        <input type="password" id="mdp" name="mdp" required>
+        <br>
+        <label>
+            <input type="checkbox" name="souvenir">
+            Se souvenir de moi
+        </label>
+        <br>
+        <input type="submit" value="Se connecter">
+    </form>
+
+    <p><a href="#">Mot de passe oublié ?</a></p>
+    <button type="button">S'inscrire</button>
 </body>
 
 </html>
