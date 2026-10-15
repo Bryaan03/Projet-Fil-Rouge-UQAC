@@ -4,27 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <title>Paramètres du compte</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="parametre.css">
+    <script src="supabaseClient.js" defer></script>
+    <script src="parametre.js" defer></script>
 </head>
 
 <body>
-    <h1>Paramètres du compte</h1>
-    <p><a href="conversation.html">Retour aux messages</a></p>
+    <div class="settings-container">
+        <a href="conversation.html" class="back-link">Retour aux messages</a>
+        <h1>Paramètres du compte</h1>
 
-    <div>
-        <h2>Informations du compte</h2>
-        <p><strong>Pseudo :</strong> Bryan</p>
-    </div>
+        <div class="form-group">
+            <label for="email">Adresse courriel :</label>
+            <input type="email" id="email" disabled>
+        </div>
 
-    <form action="index.html" method="get">
-        <button type="submit">Se déconnecter</button>
-    </form>
-
-    <div>
-        <h2>Suppression du compte</h2>
-        <p>La suppression du compte est définitive.</p>
-        <form action="index.html" method="get">
-            <button type="submit">Supprimer mon compte</button>
+        <form id="form-pseudo">
+            <div class="form-group">
+                <label for="pseudo">Nom d'utilisateur :</label>
+                <input type="text" id="pseudo" required>
+                <button type="submit" class="btn-modify">Modifier le pseudo</button>
+            </div>
         </form>
+
+        <p id="message"></p>
+
+        <div>
+            <button type="button" id="btn-logout" class="btn-logout">Se déconnecter</button>
+        </div>
+
+        <div class="danger-zone">
+            <h2>Suppression du compte</h2>
+            <p>La suppression du compte est définitive.</p>
+            <button type="button" id="btn-delete" class="btn-delete">Supprimer mon compte</button>
+        </div>
     </div>
 </body>
 
