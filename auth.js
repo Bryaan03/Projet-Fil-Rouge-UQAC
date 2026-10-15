@@ -79,12 +79,28 @@ authForm.addEventListener('submit', async (event) => {
             return;
         }
 
+        if (password.length < 6) {
+            message.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
+            return;
+        }
+
         if (password !== confirmPassword) {
             message.textContent = 'Les mots de passe ne correspondent pas.';
             return;
         }
 
         message.textContent = 'Inscription en cours...';
+
+        const { data: pseudoExiste } = await client
+            .from('profiles')
+            .select('id')
+            .ilike('username', username)
+            .maybeSingle();
+
+        if (pseudoExiste) {
+            message.textContent = "Ce nom d'utilisateur est déjà pris.";
+            return;
+        }
 
         const { data, error } = await client.auth.signUp({
             email,
