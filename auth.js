@@ -1,6 +1,6 @@
 const client = window.supabaseClient;
 
-let isSignUpMode = true; // Mode inscription par défaut
+let isSignUpMode = false; // Mode connexion par défaut
 
 const titre = document.getElementById('titre');
 const description = document.getElementById('description');
