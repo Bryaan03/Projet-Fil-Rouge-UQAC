@@ -3,34 +3,63 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Messages</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messagerie</title>
+    <link rel="stylesheet" href="conversation.css">
 </head>
 
 <body>
-    <header>
-        <h1>Messages</h1>
-        <nav>
-            <a href="contact.html">Contacts</a>
-            <a href="parametre.html">Paramètres</a>
-        </nav>
-    </header>
+    <div class="app-container">
+        
+        <!-- Gauche : Liste des conversations -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Discussions</h2>
+                <div class="sidebar-btns">
+                    <a href="contact.html" title="Nouveau message" class="btn-action">+</a>
+                    <a href="parametre.html" title="Paramètres" class="btn-action">⚙️</a>
+                </div>
+            </div>
 
-    <br>
+            <div class="conversations-list" id="conversations-list">
+                <!-- Exemples -->
+                <div class="conversation-item active">
+                    <div class="conv-name">Redouane</div>
+                    <div class="conv-last-msg">Super !</div>
+                </div>
 
-    <button type="button">Nouvelle conversation</button>
+                <div class="conversation-item">
+                    <div class="conv-name">Robert Duchmol</div>
+                    <div class="conv-last-msg">Salut !</div>
+                </div>
+            </div>
+        </div>
 
-    <ul>
-        <li>
-            <strong>Bryan</strong>
-            <p>Salut !</p>
-            <p>Il y a 30 minutes</p>
-        </li>
-        <li>
-            <strong>Redouane</strong>
-            <p>Salut, ca va ?</p>
-            <p>Il y a 1 heure</p>
-        </li>
-    </ul>
+        <!-- Zone de discussion -->
+        <main class="chat-main">
+            <div class="chat-header">
+                <h3 id="chat-title">Redouane</h3>
+            </div>
+
+            <!-- Messages -->
+            <div class="messages-container" id="messages-container">
+                <div class="message received">
+                    <p>Salut ! Ca va ?</p>
+                </div>
+                <div class="message sent">
+                    <p>Oui, ça va bien !</p>
+                </div>
+                <div class="message received">
+                    <p>Super !</p>
+                </div>
+            </div>
+
+            <form class="message-form" id="message-form">
+                <input type="text" id="message-input" placeholder="Écrivez votre message...">
+                <button type="submit" id="btn-send">Envoyer</button>
+            </form>
+        </main>
+    </div>
 </body>
 
 </html>
