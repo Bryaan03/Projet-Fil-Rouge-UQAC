@@ -73,6 +73,13 @@ body {
     text-overflow: ellipsis;
 }
 
+.conversations-list p {
+    padding: 15px;
+    text-align: center;
+    color: gray;
+    font-size: 14px;
+}
+
 /* Chat */
 .chat-main {
     flex: 1;
