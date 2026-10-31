@@ -2,8 +2,12 @@ const client = window.supabaseClient;
 
 const conversationsList = document.getElementById('conversations-list');
 const chatTitle = document.getElementById('chat-title');
+const messagesContainer = document.getElementById('messages-container');
+const messageForm = document.getElementById('message-form');
+const messageInput = document.getElementById('message-input');
 
 let currentUser = null;
+let currentConversationId = null;
 
 async function getCurrentUser() {
     const { data } = await client.auth.getSession();
@@ -84,6 +88,7 @@ async function getConversations() {
             const lastMsg = visibleMessages[0] || null;
 
             return {
+                id: conv.id,
                 name: displayName,
                 lastMessage: lastMsg ? lastMsg.content : 'Aucun message pour le moment',
                 lastMessageDate: lastMsg ? lastMsg.created_at : conv.created_at
@@ -100,6 +105,70 @@ async function getConversations() {
     }
 }
 
+async function getMessages(conversationId) {
+    try {
+        const { data: messages, error } = await client
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', conversationId)
+            .is('deleted_at', null)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('Erreur lors de la récupération des messages :', error);
+            return [];
+        }
+
+        return messages;
+    } catch (error) {
+        console.error('Erreur dans getMessages :', error);
+        return [];
+    }
+}
+
+function afficherMessages(messages) {
+    if (!messagesContainer) return;
+
+    messagesContainer.innerHTML = '';
+
+    if (!messages || messages.length === 0) {
+        const emptyMsg = document.createElement('p');
+        emptyMsg.className = 'empty-messages';
+        emptyMsg.textContent = 'Aucun message pour le moment.';
+        messagesContainer.appendChild(emptyMsg);
+        return;
+    }
+
+    messages.forEach((msg) => {
+        const messageDiv = document.createElement('div');
+        const isSent = msg.sender_id === currentUser.id;
+        messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+
+        const p = document.createElement('p');
+        p.textContent = msg.content;
+        messageDiv.appendChild(p);
+
+        messagesContainer.appendChild(messageDiv);
+    });
+}
+
+async function chargerConversation(conv) {
+    currentConversationId = conv.id;
+
+    chatTitle.textContent = conv.name;
+    messageForm.style.display = 'flex';
+
+    messagesContainer.innerHTML = '';
+    const loadingMsg = document.createElement('p');
+    loadingMsg.className = 'loading-messages';
+    loadingMsg.textContent = 'Chargement des messages...';
+    messagesContainer.appendChild(loadingMsg);
+
+    const messages = await getMessages(conv.id);
+
+    afficherMessages(messages);
+}
+
 function afficherConversations(conversations) {
     if (!conversationsList) return;
 
@@ -109,8 +178,28 @@ function afficherConversations(conversations) {
         const emptyMsg = document.createElement('p');
         emptyMsg.textContent = 'Aucune conversation.';
         conversationsList.appendChild(emptyMsg);
+
+        chatTitle.textContent = 'Discussions';
+
+        messagesContainer.innerHTML = '';
+        const emptyChatMsg = document.createElement('p');
+        emptyChatMsg.className = 'empty-messages';
+        emptyChatMsg.textContent = 'Aucune conversation disponible.';
+        messagesContainer.appendChild(emptyChatMsg);
+
+        messageForm.style.display = 'none';
         return;
     }
+
+    chatTitle.textContent = 'Sélectionnez une conversation';
+
+    messagesContainer.innerHTML = '';
+    const selectMsg = document.createElement('p');
+    selectMsg.className = 'empty-messages';
+    selectMsg.textContent = 'Veuillez sélectionner une conversation';
+    messagesContainer.appendChild(selectMsg);
+
+    messageForm.style.display = 'none';
 
     conversations.forEach((conv) => {
         const item = document.createElement('div');
@@ -128,17 +217,53 @@ function afficherConversations(conversations) {
         item.appendChild(msgDiv);
 
         item.addEventListener('click', () => {
+            if (currentConversationId === conv.id) return;
+
             document.querySelectorAll('.conversation-item').forEach(el => el.classList.remove('active'));
             item.classList.add('active');
 
-            if (chatTitle) {
-                chatTitle.textContent = conv.name;
-            }
+            chargerConversation(conv);
         });
 
         conversationsList.appendChild(item);
     });
 }
+
+// Envoi d'un message
+messageForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!currentConversationId || !currentUser) return;
+
+    const content = messageInput.value.trim();
+    if (!content) return;
+
+    messageInput.value = '';
+
+    try {
+        const { error } = await client
+            .from('messages')
+            .insert({
+                conversation_id: currentConversationId,
+                sender_id: currentUser.id,
+                content: content,
+                type: 'text'
+            });
+
+        if (error) {
+            console.error("Erreur lors de l'envoi du message :", error);
+            return;
+        }
+
+        const activeConvLastMsg = document.querySelector('.conversation-item.active .conv-last-msg');
+        activeConvLastMsg.textContent = content;
+
+        const messages = await getMessages(currentConversationId);
+        afficherMessages(messages);
+    } catch (error) {
+        console.error("Erreur dans l'envoi du message :", error);
+    }
+});
 
 async function initialiser() {
     await getCurrentUser();
@@ -150,6 +275,14 @@ async function initialiser() {
         loadingMsg.textContent = 'Chargement des conversations...';
         conversationsList.appendChild(loadingMsg);
     }
+
+    messagesContainer.innerHTML = '';
+    const selectMsg = document.createElement('p');
+    selectMsg.className = 'empty-messages';
+    selectMsg.textContent = 'Veuillez sélectionner une conversation';
+    messagesContainer.appendChild(selectMsg);
+
+    messageForm.style.display = 'none';
 
     const conversations = await getConversations();
     afficherConversations(conversations);

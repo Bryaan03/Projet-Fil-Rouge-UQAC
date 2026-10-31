@@ -43,6 +43,7 @@ body {
 
 .conversations-list {
     flex: 1;
+    overflow-y: auto;
 }
 
 .conversation-item {
@@ -97,7 +98,6 @@ body {
     font-size: 16px;
     font-weight: bold;
     text-align: center;
-    
 }
 
 .messages-container {
@@ -106,6 +106,15 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    overflow-y: auto;
+}
+
+.messages-container .empty-messages,
+.messages-container .loading-messages {
+    text-align: center;
+    color: gray;
+    margin: auto;
+    font-size: 14px;
 }
 
 .message {
@@ -113,6 +122,10 @@ body {
     padding: 10px 14px;
     border-radius: 8px;
     font-size: 14px;
+}
+
+.message p {
+    margin: 0;
 }
 
 .message.received {

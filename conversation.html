@@ -25,39 +25,21 @@
             </div>
 
             <div class="conversations-list" id="conversations-list">
-                <!-- Exemples -->
-                <div class="conversation-item active">
-                    <div class="conv-name">Redouane</div>
-                    <div class="conv-last-msg">Super !</div>
-                </div>
-
-                <div class="conversation-item">
-                    <div class="conv-name">Robert Duchmol</div>
-                    <div class="conv-last-msg">Salut !</div>
-                </div>
             </div>
         </div>
 
         <!-- Zone de discussion -->
         <main class="chat-main">
             <div class="chat-header">
-                <h3 id="chat-title">Redouane</h3>
+                <h3 id="chat-title">Sélectionnez une conversation</h3>
             </div>
 
             <!-- Messages -->
             <div class="messages-container" id="messages-container">
-                <div class="message received">
-                    <p>Salut ! Ca va ?</p>
-                </div>
-                <div class="message sent">
-                    <p>Oui, ça va bien !</p>
-                </div>
-                <div class="message received">
-                    <p>Super !</p>
-                </div>
+                <p class="empty-messages">Veuillez sélectionner une conversation</p>
             </div>
 
-            <form class="message-form" id="message-form">
+            <form class="message-form" id="message-form" style="display: none;">
                 <input type="text" id="message-input" placeholder="Écrivez votre message...">
                 <button type="submit" id="btn-send">Envoyer</button>
             </form>
