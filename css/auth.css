@@ -1,0 +1,133 @@
+/* css/auth.css */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.auth-card {
+  background: var(--bg-card, #f5f5f7);
+  border: 1px solid var(--border-color, #d2d2d7);
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 350px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.auth-title {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 22px;
+}
+
+.auth-description {
+  text-align: center;
+  color: var(--text-muted, #86868b);
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.auth-form-group {
+  margin-bottom: 12px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-color, #d2d2d7);
+  border-radius: 8px;
+  background-color: var(--input-bg, #ffffff);
+  color: var(--text-main, #1d1d1f);
+  font-size: 14px;
+}
+
+.auth-field-error {
+  display: block;
+  color: var(--danger, #dc3545);
+  font-size: 12px;
+  margin-top: 4px;
+  min-height: 14px;
+}
+
+.auth-options {
+  margin: 10px 0 14px;
+  font-size: 13px;
+}
+
+.auth-options-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.auth-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.auth-checkbox {
+  width: auto;
+  cursor: pointer;
+}
+
+.auth-link {
+  color: var(--primary, #007aff);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--primary, #007aff);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.auth-submit-btn:hover {
+  opacity: 0.9;
+}
+
+.auth-message {
+  text-align: center;
+  font-size: 13px;
+  margin: 10px 0;
+  min-height: 18px;
+}
+
+.auth-toggle-section {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color, #d2d2d7);
+}
+
+.auth-toggle-text {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: var(--text-muted, #86868b);
+}
+
+.auth-toggle-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border-color, #d2d2d7);
+  background: var(--input-bg, #ffffff);
+  color: var(--text-main, #1d1d1f);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}

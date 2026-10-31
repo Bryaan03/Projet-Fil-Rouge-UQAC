@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Accueil - Messagerie</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/auth.css" />
+    <script src="../supabaseClient.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+  </head>
+
+  <body class="auth-page">
+    <div class="auth-card">
+      <h1 id="titre" class="auth-title">Connexion</h1>
+      <p id="description" class="auth-description">
+        Connectez-vous pour accéder à vos conversations
+      </p>
+
+      <form id="auth-form" class="auth-form" novalidate>
+        <div
+          id="username-container"
+          class="auth-form-group"
+          style="display: none"
+        >
+          <input
+            type="text"
+            id="username"
+            class="auth-input"
+            name="username"
+            placeholder="Nom d'utilisateur"
+          />
+          <span id="err-username" class="auth-field-error"></span>
+        </div>
+
+        <div class="auth-form-group">
+          <input
+            type="email"
+            id="email"
+            class="auth-input"
+            name="email"
+            placeholder="Adresse email"
+          />
+          <span id="err-email" class="auth-field-error"></span>
+        </div>
+
+        <div class="auth-form-group">
+          <input
+            type="password"
+            id="mdp"
+            class="auth-input"
+            name="mdp"
+            placeholder="Mot de passe"
+          />
+          <span id="err-mdp" class="auth-field-error"></span>
+        </div>
+
+        <div
+          id="confirm-mdp-container"
+          class="auth-form-group"
+          style="display: none"
+        >
+          <input
+            type="password"
+            id="confirm-mdp"
+            class="auth-input"
+            name="confirm-mdp"
+            placeholder="Confirmer le mot de passe"
+          />
+          <span id="err-confirm" class="auth-field-error"></span>
+        </div>
+
+        <div id="connexion-options" class="auth-options">
+          <div class="auth-options-row">
+            <label class="auth-checkbox-label">
+              <input
+                type="checkbox"
+                name="souvenir"
+                class="auth-checkbox"
+                checked
+              />
+              Se souvenir de moi
+            </label>
+            <a href="#" class="auth-link">Mot de passe oublié ?</a>
+          </div>
+        </div>
+
+        <input
+          type="submit"
+          id="btn-submit"
+          class="auth-submit-btn"
+          value="Se connecter"
+        />
+      </form>
+
+      <p id="message" class="auth-message"></p>
+
+      <div class="auth-toggle-section">
+        <p id="toggle-text" class="auth-toggle-text">
+          Vous n'avez pas de compte ?
+        </p>
+        <button type="button" id="btn-toggle" class="auth-toggle-btn">
+          S'inscrire
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

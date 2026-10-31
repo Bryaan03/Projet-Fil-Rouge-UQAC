@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Paramètres du compte</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/parametre.css" />
+    <script src="../supabaseClient.js" defer></script>
+    <script src="../js/parametre.js" defer></script>
+  </head>
+
+  <body class="param-page">
+    <div class="param-container">
+      <a href="conversation.html" class="param-back-link"
+        >← Retour aux messages</a
+      >
+      <h1 class="param-title">Paramètres du compte</h1>
+
+      <!-- Choix d'avatar avec aperçu immédiat (FileReader) -->
+      <div class="param-avatar-section">
+        <img
+          id="avatar-preview"
+          class="param-avatar-preview"
+          src="https://i.pravatar.cc/150?u=default"
+          alt="Avatar de profil"
+        />
+        <label for="avatar-input" class="param-avatar-btn"
+          >Changer la photo de profil</label
+        >
+        <input
+          type="file"
+          id="avatar-input"
+          class="param-file-input"
+          accept="image/*"
+        />
+      </div>
+
+      <!-- Sélecteur de thème : Clair / Sombre -->
+      <div class="param-theme-row">
+        <label
+          for="theme-toggle"
+          class="param-label"
+          style="margin: 0; cursor: pointer"
+          >Thème sombre (Dark Mode)</label
+        >
+        <input type="checkbox" id="theme-toggle" class="param-checkbox" />
+      </div>
+
+      <!-- Adresse courriel (lecture seule) -->
+      <div class="param-form-group">
+        <label for="email" class="param-label">Adresse courriel :</label>
+        <input type="email" id="email" class="param-input" disabled />
+      </div>
+
+      <!-- Formulaire Pseudo & Statut -->
+      <form id="form-profil">
+        <div class="param-form-group">
+          <label for="pseudo" class="param-label">Nom d'utilisateur :</label>
+          <input type="text" id="pseudo" class="param-input" required />
+        </div>
+
+        <div class="param-form-group">
+          <label for="statut" class="param-label">Statut :</label>
+          <select id="statut" class="param-select">
+            <option value="Disponible">🟢 Disponible</option>
+            <option value="Occupé">🔴 Occupé</option>
+            <option value="Absent">🌙 Absent</option>
+            <option value="En réunion">📅 En réunion</option>
+          </select>
+        </div>
+
+        <button type="submit" class="param-btn param-btn-modify">
+          Enregistrer les modifications
+        </button>
+      </form>
+
+      <p id="message" class="param-message"></p>
+
+      <!-- Déconnexion -->
+      <div>
+        <button
+          type="button"
+          id="btn-logout"
+          class="param-btn param-btn-logout"
+        >
+          Se déconnecter
+        </button>
+      </div>
+
+      <!-- Zone de suppression du compte -->
+      <div class="param-danger-zone">
+        <h2 class="param-subtitle">Suppression du compte</h2>
+        <p class="param-danger-text">
+          La suppression du compte est définitive.
+        </p>
+        <button
+          type="button"
+          id="btn-delete"
+          class="param-btn param-btn-delete"
+        >
+          Supprimer mon compte
+        </button>
+      </div>
+    </div>
+  </body>
+</html>
