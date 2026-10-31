@@ -191,6 +191,11 @@ function afficherConversations(conversations) {
         return;
     }
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedId = urlParams.get('id');
+    let selectedConversation = null;
+    let conversationItem = null;
+
     chatTitle.textContent = 'Sélectionnez une conversation';
 
     messagesContainer.innerHTML = '';
@@ -225,8 +230,19 @@ function afficherConversations(conversations) {
             chargerConversation(conv);
         });
 
+        if (String(conv.id) === selectedId) {
+            selectedConversation = conv;
+            conversationItem = item;
+        }
+
         conversationsList.appendChild(item);
     });
+
+    if (selectedConversation && conversationItem) {
+        conversationItem.classList.add('active');
+        chargerConversation(selectedConversation);
+        messageInput.focus();
+    }
 }
 
 // Envoi d'un message
