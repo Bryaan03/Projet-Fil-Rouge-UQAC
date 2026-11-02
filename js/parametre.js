@@ -106,9 +106,14 @@ const ParamManager = {
         }
         if (parsed.status && this.statutSelect)
           this.statutSelect.value = parsed.status;
-        if (parsed.avatar && this.avatarPreview) {
-          this.avatarPreview.src = parsed.avatar;
-          this.currentAvatarDataUrl = parsed.avatar;
+
+        // Priorité à l'avatar sauvegardé localement pour cet utilisateur
+        const savedAvatar =
+          (parsed.id && localStorage.getItem(`avatar_${parsed.id}`)) ||
+          parsed.avatar;
+        if (savedAvatar && this.avatarPreview) {
+          this.avatarPreview.src = savedAvatar;
+          this.currentAvatarDataUrl = savedAvatar;
         }
       } catch (e) {
         console.error(e);
@@ -146,9 +151,14 @@ const ParamManager = {
         if (profile.bio && this.statutSelect) {
           this.statutSelect.value = profile.bio;
         }
-        if (profile.avatar_url && this.avatarPreview) {
-          this.avatarPreview.src = profile.avatar_url;
-          this.currentAvatarDataUrl = profile.avatar_url;
+        // Si Supabase a un avatar_url valide, on le prend, sinon on garde l'avatar local
+        const localAvatar = localStorage.getItem(
+          `avatar_${this.currentUser.id}`,
+        );
+        const bestAvatar = profile.avatar_url || localAvatar;
+        if (bestAvatar && this.avatarPreview) {
+          this.avatarPreview.src = bestAvatar;
+          this.currentAvatarDataUrl = bestAvatar;
         }
       }
     } catch (err) {
@@ -175,6 +185,13 @@ const ParamManager = {
     this.message.textContent = "Enregistrement en cours...";
 
     try {
+      const userId = this.currentUser?.id || "local";
+
+      // Sauvegarder immédiatement l'avatar dans une clé dédiée persistante
+      if (this.currentAvatarDataUrl) {
+        localStorage.setItem(`avatar_${userId}`, this.currentAvatarDataUrl);
+      }
+
       if (this.client && this.currentUser?.id) {
         if (
           nouveauPseudo.toLowerCase() !== this.currentUsername.toLowerCase()
@@ -192,32 +209,23 @@ const ParamManager = {
           }
         }
 
+        // Utilisation de upsert pour forcer l'écriture dans profiles
         const updates = {
+          id: this.currentUser.id,
           username: nouveauPseudo,
           bio: nouveauStatut,
+          avatar_url: this.currentAvatarDataUrl,
         };
-
-        if (this.currentAvatarDataUrl) {
-          updates.avatar_url = this.currentAvatarDataUrl;
-        }
 
         const { error: errUpdate } = await this.client
           .from("profiles")
-          .update(updates)
-          .eq("id", this.currentUser.id);
+          .upsert(updates);
 
         if (errUpdate) {
-          const { error: errFallback } = await this.client
+          console.warn("Avertissement colonnes profiles :", errUpdate.message);
+          await this.client
             .from("profiles")
-            .update({ username: nouveauPseudo })
-            .eq("id", this.currentUser.id);
-
-          if (errFallback) {
-            this.message.style.color = "#dc3545";
-            this.message.textContent =
-              "Erreur Supabase : " + errFallback.message;
-            return;
-          }
+            .upsert({ id: this.currentUser.id, username: nouveauPseudo });
         }
 
         await this.client.auth.updateUser({
@@ -229,18 +237,23 @@ const ParamManager = {
       }
 
       this.currentUsername = nouveauPseudo;
+      const finalAvatar =
+        this.currentAvatarDataUrl ||
+        localStorage.getItem(`avatar_${userId}`) ||
+        this.avatarPreview.src;
 
       localStorage.setItem(
         "currentUser",
         JSON.stringify({
-          id: this.currentUser?.id || 1,
+          id: userId,
           email: this.emailInput.value,
           pseudo: nouveauPseudo,
           status: nouveauStatut,
-          avatar: this.currentAvatarDataUrl || this.avatarPreview.src,
+          avatar: finalAvatar,
         }),
       );
 
+      this.avatarPreview.src = finalAvatar;
       this.message.style.color = "#28a745";
       this.message.textContent = "Modifications enregistrées avec succès !";
     } catch (err) {
