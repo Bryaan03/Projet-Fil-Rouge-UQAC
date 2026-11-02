@@ -4,49 +4,61 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Messagerie</title>
+    <link rel="stylesheet" href="../css/base.css" />
     <link rel="stylesheet" href="../css/conversation.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js" defer></script>
+    <script src="../supabaseClient.js" defer></script>
     <script src="../js/conversation.js" defer></script>
   </head>
 
-  <body>
-    <div class="app-container">
+  <body class="chat-page">
+    <div class="chat-app-container">
       <!-- Gauche : Liste des conversations -->
-      <div class="sidebar">
-        <div class="sidebar-header">
-          <h2>Discussions</h2>
-          <div class="sidebar-btns">
-            <a href="contact.html" title="Nouveau message" class="btn-action"
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-header">
+          <h2 class="chat-sidebar-title">Discussions</h2>
+          <div class="chat-sidebar-btns">
+            <a
+              href="contact.html"
+              title="Nouveau message"
+              class="chat-btn-action"
               >+</a
             >
-            <a href="parametre.html" title="Paramètres" class="btn-action"
+            <a href="parametre.html" title="Paramètres" class="chat-btn-action"
               >⚙️</a
             >
           </div>
         </div>
 
-        <div class="conversations-list" id="conversations-list"></div>
+        <div class="chat-conversations-list" id="conversations-list"></div>
       </div>
 
       <!-- Zone de discussion -->
       <main class="chat-main">
         <div class="chat-header">
-          <h3 id="chat-title">Sélectionnez une conversation</h3>
+          <h3 id="chat-title" class="chat-header-title">
+            Sélectionnez une conversation
+          </h3>
         </div>
 
         <!-- Messages -->
-        <div class="messages-container" id="messages-container">
-          <p class="empty-messages">Veuillez sélectionner une conversation</p>
+        <div class="chat-messages-container" id="messages-container">
+          <p class="chat-empty-messages">
+            Veuillez sélectionner une conversation
+          </p>
         </div>
 
-        <form class="message-form" id="message-form" style="display: none">
+        <form class="chat-message-form" id="message-form" style="display: none">
           <input
             type="text"
             id="message-input"
+            class="chat-message-input"
             placeholder="Écrivez votre message..."
+            autocomplete="off"
           />
-          <button type="submit" id="btn-send">Envoyer</button>
+          <button type="submit" id="btn-send" class="chat-send-btn">
+            Envoyer
+          </button>
         </form>
       </main>
     </div>
