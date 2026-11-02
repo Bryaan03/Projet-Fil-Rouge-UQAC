@@ -3,34 +3,29 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contacts</title>
+    <link rel="stylesheet" href="contact.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js" defer></script>
+    <script src="contact.js" defer></script>
 </head>
 
 <body>
-    <p><a href="conversation.html">Retour aux messages</a></p>
-    <h1>Contacts</h1>
-
-    <form method="get">
-        <label for="pseudo">Rechercher un contact :</label>
-        <input type="text" id="pseudo" name="pseudo" placeholder="Pseudo" required>
-        <button type="submit">Inviter</button>
-    </form>
-
-    <div>
-        <h2>Invitations reçues</h2>
-        <ul>
-            <li>Alex</li>
-            <li>Marie</li>
-        </ul>
+    <div class="top-bar">
+        <a href="conversation.html" class="back-link">Retour aux messages</a>
     </div>
 
-    <div>
-        <h2>Invitations envoyées</h2>
-        <ul>
-            <li>Thomas</li>
-            <li>Julie</li>
-        </ul>
+    <div class="search">
+        <h1>Rechercher un contact</h1>
+        <p>Trouvez un utilisateur pour démarrer une conversation.</p>
+        <form id="invite-form">
+            <input type="text" id="pseudo" placeholder="Rechercher un contact..." required>
+            <button type="submit">Rechercher</button>
+        </form>
     </div>
+
+    <div id="contact-list"></div>
 </body>
 
 </html>
