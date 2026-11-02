@@ -2,33 +2,53 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>Messages</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Messagerie</title>
+    <link rel="stylesheet" href="../css/conversation.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js" defer></script>
+    <script src="../js/conversation.js" defer></script>
   </head>
 
   <body>
-    <header>
-      <h1>Messages</h1>
-      <nav>
-        <a href="contact.html">Contacts</a>
-        <a href="parametre.html">Paramètres</a>
-      </nav>
-    </header>
+    <div class="app-container">
+      <!-- Gauche : Liste des conversations -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <h2>Discussions</h2>
+          <div class="sidebar-btns">
+            <a href="contact.html" title="Nouveau message" class="btn-action"
+              >+</a
+            >
+            <a href="parametre.html" title="Paramètres" class="btn-action"
+              >⚙️</a
+            >
+          </div>
+        </div>
 
-    <br />
+        <div class="conversations-list" id="conversations-list"></div>
+      </div>
 
-    <button type="button">Nouvelle conversation</button>
+      <!-- Zone de discussion -->
+      <main class="chat-main">
+        <div class="chat-header">
+          <h3 id="chat-title">Sélectionnez une conversation</h3>
+        </div>
 
-    <ul>
-      <li>
-        <strong>Bryan</strong>
-        <p>Salut !</p>
-        <p>Il y a 30 minutes</p>
-      </li>
-      <li>
-        <strong>Redouane</strong>
-        <p>Salut, ca va ?</p>
-        <p>Il y a 1 heure</p>
-      </li>
-    </ul>
+        <!-- Messages -->
+        <div class="messages-container" id="messages-container">
+          <p class="empty-messages">Veuillez sélectionner une conversation</p>
+        </div>
+
+        <form class="message-form" id="message-form" style="display: none">
+          <input
+            type="text"
+            id="message-input"
+            placeholder="Écrivez votre message..."
+          />
+          <button type="submit" id="btn-send">Envoyer</button>
+        </form>
+      </main>
+    </div>
   </body>
 </html>
