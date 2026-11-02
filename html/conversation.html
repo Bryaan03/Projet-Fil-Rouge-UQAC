@@ -13,35 +13,77 @@
 
   <body class="chat-page">
     <div class="chat-app-container">
-      <!-- Gauche : Liste des conversations -->
-      <div class="chat-sidebar">
+      <!-- Gauche : Liste des discussions -->
+      <aside class="chat-sidebar">
         <div class="chat-sidebar-header">
-          <h2 class="chat-sidebar-title">Discussions</h2>
-          <div class="chat-sidebar-btns">
-            <a
-              href="contact.html"
-              title="Nouveau message"
-              class="chat-btn-action"
-              >+</a
-            >
-            <a href="parametre.html" title="Paramètres" class="chat-btn-action"
-              >⚙️</a
-            >
+          <div class="chat-sidebar-top">
+            <h2 class="chat-sidebar-title">Messages</h2>
+            <div class="chat-sidebar-btns">
+              <a
+                href="contact.html"
+                title="Nouveau message"
+                class="chat-btn-action"
+                >📝</a
+              >
+              <a
+                href="parametre.html"
+                title="Paramètres"
+                class="chat-btn-action"
+                >⚙️</a
+              >
+            </div>
+          </div>
+          <div class="chat-search-wrapper">
+            <input
+              type="text"
+              id="search-conv"
+              class="chat-search-input"
+              placeholder="Rechercher"
+              autocomplete="off"
+            />
           </div>
         </div>
 
         <div class="chat-conversations-list" id="conversations-list"></div>
-      </div>
+      </aside>
 
-      <!-- Zone de discussion -->
+      <!-- Droite : Zone de discussion -->
       <main class="chat-main">
-        <div class="chat-header">
-          <h3 id="chat-title" class="chat-header-title">
-            Sélectionnez une conversation
-          </h3>
-        </div>
+        <header class="chat-header" id="chat-header">
+          <!-- Cliquer sur le profil ouvre la modale de personnalisation -->
+          <div
+            class="chat-header-profile"
+            id="header-profile-trigger"
+            title="Personnaliser ce contact (pour moi)"
+          >
+            <div
+              class="chat-header-avatar-wrap"
+              id="header-avatar-wrap"
+              style="display: none"
+            >
+              <img
+                id="chat-avatar"
+                class="chat-header-avatar"
+                src=""
+                alt="Avatar"
+              />
+              <span class="chat-presence-dot"></span>
+            </div>
+            <div class="chat-header-name-row">
+              <h3 id="chat-title" class="chat-header-title">
+                Sélectionnez une conversation
+              </h3>
+              <span
+                id="chat-edit-icon"
+                class="chat-edit-hint"
+                style="display: none"
+                >✎</span
+              >
+            </div>
+            <span id="chat-subtitle" class="chat-header-subtitle"></span>
+          </div>
+        </header>
 
-        <!-- Messages -->
         <div class="chat-messages-container" id="messages-container">
           <p class="chat-empty-messages">
             Veuillez sélectionner une conversation
@@ -49,18 +91,98 @@
         </div>
 
         <form class="chat-message-form" id="message-form" style="display: none">
-          <input
-            type="text"
-            id="message-input"
-            class="chat-message-input"
-            placeholder="Écrivez votre message..."
-            autocomplete="off"
-          />
-          <button type="submit" id="btn-send" class="chat-send-btn">
-            Envoyer
+          <button
+            type="button"
+            id="btn-attach"
+            class="chat-plus-btn"
+            title="Ajouter un média"
+          >
+            +
           </button>
+          <div class="chat-input-pill">
+            <input
+              type="text"
+              id="message-input"
+              class="chat-message-input"
+              placeholder="Message"
+              autocomplete="off"
+            />
+            <button
+              type="submit"
+              id="btn-send"
+              class="chat-send-btn"
+              title="Envoyer"
+            >
+              ↑
+            </button>
+          </div>
         </form>
       </main>
+    </div>
+
+    <!-- Modale iMessage : Modifier le nom et la photo du contact (uniquement pour moi) -->
+    <div
+      id="custom-contact-modal"
+      class="chat-modal-overlay"
+      style="display: none"
+    >
+      <div class="chat-modal-card">
+        <h4 class="chat-modal-title">Personnaliser le contact</h4>
+        <p class="chat-modal-desc">Visible uniquement par vous</p>
+
+        <div class="chat-modal-avatar-box">
+          <img
+            id="modal-contact-avatar"
+            class="chat-modal-avatar"
+            src=""
+            alt="Aperçu"
+          />
+          <label for="modal-avatar-input" class="chat-modal-avatar-btn"
+            >Choisir une photo</label
+          >
+          <input
+            type="file"
+            id="modal-avatar-input"
+            class="chat-modal-file"
+            accept="image/*"
+          />
+        </div>
+
+        <form id="custom-contact-form">
+          <div class="chat-modal-group">
+            <label for="modal-contact-name" class="chat-modal-label"
+              >Surnom / Nom affiché :</label
+            >
+            <input
+              type="text"
+              id="modal-contact-name"
+              class="chat-modal-input"
+              placeholder="Nom personnalisé"
+              required
+            />
+          </div>
+
+          <div class="chat-modal-actions">
+            <button
+              type="button"
+              id="btn-reset-contact"
+              class="chat-modal-btn chat-modal-btn-reset"
+            >
+              Réinitialiser
+            </button>
+            <button
+              type="button"
+              id="btn-cancel-modal"
+              class="chat-modal-btn chat-modal-btn-cancel"
+            >
+              Annuler
+            </button>
+            <button type="submit" class="chat-modal-btn chat-modal-btn-save">
+              OK
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </body>
 </html>
