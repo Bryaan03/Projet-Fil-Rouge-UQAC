@@ -89,6 +89,8 @@ const AuthManager = {
       console.error(e);
     }
 
+    const savedAvatar = localStorage.getItem(`avatar_${user.id}`);
+
     const currentUserData = {
       id: user.id,
       email: user.email,
@@ -100,6 +102,7 @@ const AuthManager = {
       avatar:
         extra.avatar_url ||
         profileData?.avatar_url ||
+        savedAvatar ||
         user.user_metadata?.avatar_url ||
         `https://i.pravatar.cc/150?u=${user.id}`,
       status:
