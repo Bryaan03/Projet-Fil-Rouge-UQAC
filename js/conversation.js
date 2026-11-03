@@ -139,7 +139,10 @@ async function getConversations() {
                 created_at,
                 updated_at,
                 conversation_members (
-                    user_id
+                  user_id,
+                  profiles (
+                    username
+                  )
                 ),
                 messages (
                     content,
@@ -168,10 +171,11 @@ async function getConversations() {
         (m) => m.user_id !== currentUser.id,
       );
       const otherId = otherMember?.user_id || conv.id;
+      const otherUsername = otherMember?.profiles?.username;
 
       const defaultName = conv.is_group
         ? conv.name || "Groupe sans nom"
-        : `Discussion #${otherId.substring(0, 6)}`;
+        : otherUsername || `Discussion #${otherId.substring(0, 6)}`;
 
       const defaultAvatar =
         localStorage.getItem(`avatar_${otherId}`) ||
