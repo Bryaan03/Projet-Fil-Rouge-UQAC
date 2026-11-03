@@ -1,4 +1,4 @@
-/* css/conversation.css — Design Apple iMessage Complet */
+/* css/conversation.css — Design Apple iMessage Complet & Multimédia */
 .chat-page {
   font-family:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
@@ -343,6 +343,63 @@ body.dark-mode .chat-message.received {
   padding: 0 4px;
 }
 
+.chat-unsend-btn {
+  background: none;
+  border: none;
+  color: var(--primary, #007aff);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  display: none;
+}
+
+.chat-msg-row.sent:hover .chat-unsend-btn {
+  display: inline;
+}
+
+/* --- WIDGETS MULTIMÉDIAS DANS LES BULLES --- */
+.chat-media-img {
+  max-width: 220px;
+  border-radius: 12px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.chat-media-video {
+  max-width: 240px;
+  border-radius: 12px;
+  display: block;
+  margin-bottom: 4px;
+  outline: none;
+}
+
+.chat-doc-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.chat-doc-card:hover {
+  opacity: 0.85;
+}
+
+.chat-gps-preview {
+  width: 220px;
+  height: 100px;
+  border-radius: 10px;
+  display: block;
+  text-decoration: none;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 /* --- RÉACTIONS TAPBACK iMESSAGE --- */
 .chat-reaction-bar {
   position: absolute;
@@ -389,13 +446,17 @@ body.dark-mode .chat-message.received {
   z-index: 5;
 }
 
-/* --- BARRE DE SAISIE PILULE iMESSAGE --- */
+/* --- BARRE DE SAISIE PILULE iMESSAGE & MULTIMÉDIA --- */
 .chat-message-form {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 16px 14px;
   background-color: var(--bg-page, #ffffff);
+}
+
+.chat-plus-container {
+  position: relative;
 }
 
 .chat-plus-btn {
@@ -411,6 +472,63 @@ body.dark-mode .chat-message.received {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.chat-attach-menu {
+  position: absolute;
+  bottom: 48px;
+  left: 0;
+  background-color: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #d2d2d7);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  z-index: 50;
+  min-width: 160px;
+}
+
+.chat-menu-item {
+  background: none;
+  border: none;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  color: var(--text-main, #1d1d1f);
+}
+
+.chat-menu-item:hover {
+  background-color: rgba(0, 122, 255, 0.1);
+  color: var(--primary, #007aff);
+}
+
+.chat-mic-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  color: var(--text-muted, #86868b);
+}
+
+.chat-mic-btn.recording {
+  color: #ff3b30;
+  animation: chatPulse 1s infinite;
+}
+
+@keyframes chatPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .chat-input-pill {
@@ -450,6 +568,31 @@ body.dark-mode .chat-message.received {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.chat-gif-card {
+  max-width: 420px !important;
+}
+
+.chat-gif-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.chat-gif-item {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.chat-gif-item:hover {
+  transform: scale(1.03);
 }
 
 /* --- MODALE PERSONNALISATION CONTACT --- */
