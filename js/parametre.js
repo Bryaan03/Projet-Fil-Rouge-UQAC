@@ -128,7 +128,7 @@ const ParamManager = {
 
       if (!data?.session) {
         if (!this.currentUser) {
-          window.location.replace("index.html");
+          window.location.replace("../index.html");
         }
         return;
       }
@@ -281,7 +281,7 @@ const ParamManager = {
     });
     sessionStorage.clear();
 
-    window.location.replace("index.html?logout=1");
+    window.location.replace("../index.html?logout=1");
   },
 
   async handleDeleteAccount() {
@@ -308,7 +308,7 @@ const ParamManager = {
     });
     sessionStorage.clear();
 
-    window.location.replace("index.html?logout=1");
+    window.location.replace("../index.html?logout=1");
   },
 };
 

@@ -98,7 +98,7 @@ async function getCurrentUser() {
   const { data } = await client.auth.getSession();
 
   if (!data?.session) {
-    window.location.href = "index.html";
+    window.location.href = "../index.html";
     return null;
   }
 

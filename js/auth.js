@@ -69,7 +69,7 @@ const AuthManager = {
       const { data } = await this.client.auth.getSession();
       if (data?.session) {
         await this.syncLocalUser(data.session.user);
-        window.location.href = "conversation.html";
+        window.location.href = "html/conversation.html";
       }
     } catch (err) {
       console.error("Erreur session:", err);
@@ -202,7 +202,7 @@ const AuthManager = {
         }
 
         await this.syncLocalUser(data.user);
-        window.location.href = "conversation.html";
+        window.location.href = "html/conversation.html";
       } else {
         const username = this.usernameInput.value.trim();
         const confirmPassword = this.confirmMdpInput.value;
@@ -267,7 +267,7 @@ const AuthManager = {
             status: "Disponible",
           });
           if (data.session) {
-            window.location.href = "conversation.html";
+            window.location.href = "html/conversation.html";
           } else {
             this.message.style.color = "#28a745";
             this.message.textContent =
