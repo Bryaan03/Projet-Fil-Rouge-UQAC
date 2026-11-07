@@ -499,7 +499,15 @@ async function getMessages(conversationId) {
   try {
     const { data: messages, error } = await client
       .from("messages")
-      .select("*")
+      .select(`
+        *,
+        message_reactions (
+          id,
+          message_id,
+          user_id,
+          emoji
+        )
+      `)
       .eq("conversation_id", conversationId)
       .is("deleted_at", null)
       .order("created_at", { ascending: true });
@@ -509,6 +517,70 @@ async function getMessages(conversationId) {
   } catch (error) {
     return [];
   }
+}
+
+async function addReaction(messageId, selectedEmoji, existingReaction) {
+  if (!currentUser || !client) return;
+
+  try {
+    if (existingReaction) {
+      if (existingReaction.emoji === selectedEmoji) {
+        const { error } = await client
+          .from("message_reactions")
+          .delete()
+          .eq("message_id", messageId)
+          .eq("user_id", currentUser.id);
+
+        if (error) console.error("Erreur suppression réaction :", error);
+      } else {
+        const { error } = await client
+          .from("message_reactions")
+          .update({ emoji: selectedEmoji })
+          .eq("message_id", messageId)
+          .eq("user_id", currentUser.id);
+
+        if (error) console.error("Erreur mise à jour réaction :", error);
+      }
+    } else {
+      const { error } = await client
+        .from("message_reactions")
+        .insert({
+          message_id: messageId,
+          user_id: currentUser.id,
+          emoji: selectedEmoji,
+        });
+
+      if (error) console.error("Erreur ajout réaction :", error);
+    }
+  } catch (err) {
+    console.error("Erreur addReaction :", err);
+  }
+}
+
+function showReactionBar(row, msg) {
+  document.querySelectorAll(".chat-reaction-bar").forEach((el) => el.remove());
+
+  const reactions = msg.message_reactions || [];
+  const myReaction = reactions.find((reaction) => reaction.user_id === currentUser?.id);
+
+  const bar = document.createElement("div");
+  bar.className = "chat-reaction-bar";
+
+  const emojis = ["❤️", "👍", "😂", "😮", "😢"];
+  emojis.forEach((emoji) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `chat-reaction-option ${myReaction?.emoji === emoji ? "active" : ""}`;
+    btn.textContent = emoji;
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      bar.remove();
+      await addReaction(msg.id, emoji, myReaction);
+    });
+    bar.appendChild(btn);
+  });
+
+  row.appendChild(bar);
 }
 
 async function annulerMessage(msgId) {
@@ -630,44 +702,36 @@ function creerBulleMessage(msg, isLastSent) {
   messageDiv.appendChild(p);
   row.appendChild(messageDiv);
 
-  // Réactions Tapback
-  const reactionsSaved = JSON.parse(
-    localStorage.getItem("imessage_reactions") || "{}",
-  );
-  if (reactionsSaved[msg.id]) {
-    const badge = document.createElement("span");
+  const reactions = msg.message_reactions || [];
+  if (reactions.length > 0) {
+    const counts = {};
+    reactions.forEach((r) => {
+      counts[r.emoji] = (counts[r.emoji] ?? 0) + 1;
+    });
+
+    const badge = document.createElement("div");
     badge.className = "chat-reaction-badge";
-    badge.textContent = reactionsSaved[msg.id];
+
+    badge.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showReactionBar(row, msg);
+    });
+
+    for (const emoji in counts) {
+      const count = counts[emoji];
+      const itemSpan = document.createElement("span");
+      itemSpan.className = "chat-reaction-item";
+      itemSpan.textContent = count > 1 ? `${emoji} ${count}` : emoji;
+      badge.appendChild(itemSpan);
+    }
+
     row.appendChild(badge);
   }
 
   if (!isUnsent && msg.id) {
-    messageDiv.addEventListener("dblclick", () => {
-      document
-        .querySelectorAll(".chat-reaction-bar")
-        .forEach((el) => el.remove());
-      const bar = document.createElement("div");
-      bar.className = "chat-reaction-bar";
-      ["❤️", "👍", "😂", "😮", "😢"].forEach((emoji) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "chat-reaction-option";
-        btn.textContent = emoji;
-        btn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          const current = JSON.parse(
-            localStorage.getItem("imessage_reactions") || "{}",
-          );
-          if (current[msg.id] === emoji) delete current[msg.id];
-          else current[msg.id] = emoji;
-          localStorage.setItem("imessage_reactions", JSON.stringify(current));
-          bar.remove();
-          const msgs = await getMessages(currentConversationId);
-          afficherMessages(msgs);
-        });
-        bar.appendChild(btn);
-      });
-      row.appendChild(bar);
+    messageDiv.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      showReactionBar(row, msg);
     });
   }
 
@@ -736,6 +800,18 @@ function abonnerTempsReel(conversationId) {
       async () => {
         const messages = await getMessages(conversationId);
         afficherMessages(messages);
+      },
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "message_reactions",
+      },
+      async () => {
+        const messages = await getMessages(conversationId);
+        afficherMessages(messages, false);
       },
     )
     .subscribe();
@@ -870,6 +946,7 @@ async function envoyerMessageBase({ content, type }) {
     content: content,
     type: type,
     created_at: new Date().toISOString(),
+    message_reactions: [],
   };
   messagesContainer.appendChild(creerBulleMessage(tempMsg, true));
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -881,8 +958,6 @@ async function envoyerMessageBase({ content, type }) {
       content: content,
       type: type,
     });
-    const messages = await getMessages(currentConversationId);
-    afficherMessages(messages);
   } catch (error) {}
 }
 
@@ -908,5 +983,16 @@ async function initialiser() {
   const conversations = await getConversations();
   afficherConversations(conversations);
 }
+
+document.addEventListener("click", (e) => {
+  if (
+    !e.target.closest(".chat-reaction-bar") &&
+    !e.target.closest(".chat-reaction-badge")
+  ) {
+    document
+      .querySelectorAll(".chat-reaction-bar")
+      .forEach((el) => el.remove());
+  }
+});
 
 initialiser();

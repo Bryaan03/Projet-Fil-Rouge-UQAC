@@ -428,11 +428,16 @@ body.dark-mode .chat-message.received {
   font-size: 16px;
   cursor: pointer;
   padding: 2px;
+  border-radius: 50%;
   transition: transform 0.15s;
 }
 
 .chat-reaction-option:hover {
   transform: scale(1.3);
+}
+
+.chat-reaction-option.active {
+  background-color: #e5e5ea;
 }
 
 .chat-reaction-badge {
@@ -444,6 +449,16 @@ body.dark-mode .chat-message.received {
   font-size: 12px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.chat-reaction-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
 
 /* --- BARRE DE SAISIE PILULE iMESSAGE & MULTIMÉDIA --- */
