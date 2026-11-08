@@ -196,12 +196,6 @@ async function getConversations() {
       let previewText = "Aucun message";
       if (lastMsg) {
         if (lastMsg.unsent_at) previewText = "Message annulé";
-        else if (lastMsg.type === "image") previewText = "📷 Photo";
-        else if (lastMsg.type === "video") previewText = "📹 Vidéo";
-        else if (lastMsg.type === "file") previewText = "📎 Document";
-        else if (lastMsg.type === "location") previewText = "📍 Position GPS";
-        else if (lastMsg.type === "gif") previewText = "🎞️ GIF";
-        else if (lastMsg.type === "audio") previewText = "🎤 Message vocal";
         else previewText = lastMsg.content;
       }
 
@@ -273,17 +267,29 @@ document.getElementById("menu-doc")?.addEventListener("click", () => {
 hiddenFileInput.addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if (!file || !currentConversationId) return;
+  e.target.value = "";
 
-  const reader = new FileReader();
-  reader.onload = async (event) => {
-    const fileDataUrl = event.target.result;
-    let msgType = "file";
-    if (file.type.startsWith("image/")) msgType = "image";
-    else if (file.type.startsWith("video/")) msgType = "video";
+  let msgType = "file";
+  let subfolder = "docs";
+  if (file.type.startsWith("image/")) {
+    msgType = "image";
+    subfolder = "images";
+  } else if (file.type.startsWith("video/")) {
+    msgType = "video";
+    subfolder = "videos";
+  }
 
-    await envoyerMessageBase({ content: fileDataUrl, type: msgType });
-  };
-  reader.readAsDataURL(file);
+  messageInput.placeholder = "Envoi du fichier en cours...";
+
+  await uploadMedia({
+    fileOrBlob: file,
+    fileName: file.name,
+    mimeType: file.type || "application/octet-stream",
+    type: msgType,
+    subfolder: subfolder,
+  });
+
+  messageInput.placeholder = "Message";
 });
 
 document.getElementById("menu-gps")?.addEventListener("click", async () => {
@@ -296,8 +302,10 @@ document.getElementById("menu-gps")?.addEventListener("click", async () => {
       const lat = position.coords.latitude;
       const lon = position.coords.longitude;
       await envoyerMessageBase({
-        content: JSON.stringify({ lat, lon }),
+        content: "📍 Position GPS",
         type: "location",
+        latitude: lat,
+        longitude: lon,
       });
     },
     () => {
@@ -356,9 +364,9 @@ async function chargerGifs(query = "") {
 
       img.addEventListener("click", async () => {
         if (gifModal) gifModal.style.display = "none";
-        await envoyerMessageBase({
-          content: gif.images.fixed_height.url,
-          type: "gif",
+        await envoyerGif({
+          gifUrl: gif.images.fixed_height.url,
+          title: gif.title || "GIF",
         });
       });
       gifGrid.appendChild(img);
@@ -425,7 +433,7 @@ if (btnMic) {
       mediaRecorder.stop();
       isRecording = false;
       btnMic.classList.remove("recording");
-      messageInput.placeholder = "iMessage";
+      messageInput.placeholder = "Message";
     }
   });
 }
@@ -677,12 +685,19 @@ function creerBulleMessage(msg, isLastSent) {
   const p = document.createElement("div");
   p.className = "chat-message-text";
 
+  const attachment =
+    msg.message_attachments && msg.message_attachments.length > 0
+      ? msg.message_attachments[0]
+      : null;
+  const mediaUrl = attachment?.signed_url || attachment?.external_url || "";
+  const originalFileName = attachment?.file_name || "Document";
+
   if (isUnsent) {
     p.textContent = "Vous avez annulé l’envoi d’un message";
   } else if (msg.type === "image" || msg.type === "gif") {
     const img = document.createElement("img");
     img.className = "chat-media-img";
-    img.src = msg.content;
+    img.src = mediaUrl;
     p.appendChild(img);
   } else if (msg.type === "video") {
     const video = document.createElement("video");
@@ -692,77 +707,38 @@ function creerBulleMessage(msg, isLastSent) {
     video.preload = "metadata";
 
     const source = document.createElement("source");
-    source.src = msg.content;
-    source.type = msg.content.startsWith("data:video/")
-      ? msg.content.substring(5, msg.content.indexOf(";"))
-      : "video/mp4";
+    source.src = mediaUrl;
+    source.type = attachment?.mime_type || "video/mp4";
 
     video.appendChild(source);
     p.appendChild(video);
   } else if (msg.type === "audio") {
-    const attachment =
-      msg.message_attachments && msg.message_attachments.length > 0
-        ? msg.message_attachments[0]
-        : null;
-    const audioUrl =
-      attachment?.signed_url || attachment?.external_url || msg.content;
-
     const audio = document.createElement("audio");
     audio.controls = true;
-    audio.src = audioUrl;
+    audio.src = mediaUrl;
     p.appendChild(audio);
   } else if (msg.type === "file") {
     const link = document.createElement("a");
     link.className = "chat-doc-card";
-    link.textContent = "📎 Télécharger le document";
-    link.href = "#";
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      try {
-        if (msg.content.startsWith("data:")) {
-          const arr = msg.content.split(",");
-          const mime = arr[0].match(/:(.*?);/)[1];
-          const bstr = atob(arr[1]);
-          let n = bstr.length;
-          const u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          const blob = new Blob([u8arr], { type: mime });
-          const blobUrl = URL.createObjectURL(blob);
-          const tempLink = document.createElement("a");
-          tempLink.href = blobUrl;
-          tempLink.download = "document_partage";
-          document.body.appendChild(tempLink);
-          tempLink.click();
-          document.body.removeChild(tempLink);
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-        } else {
-          window.open(msg.content, "_blank");
-        }
-      } catch (err) {
-        window.open(msg.content, "_blank");
-      }
-    });
+    link.textContent = `📎 ${originalFileName}`;
+    link.href = mediaUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.download = originalFileName;
     p.appendChild(link);
   } else if (msg.type === "location") {
-    let lat = 46.8139,
-      lon = -71.2082;
-    try {
-      const parsed = JSON.parse(msg.content);
-      lat = parsed.lat;
-      lon = parsed.lon;
-    } catch (e) {}
+    const lat = msg.latitude ?? 0;
+    const lon = msg.longitude ?? 0;
 
     const mapCard = document.createElement("a");
     mapCard.className = "chat-gps-preview";
     mapCard.href = `https://maps.google.com/?q=${lat},${lon}`;
     mapCard.target = "_blank";
     mapCard.innerHTML = `
-            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#e3e3e8; border-radius:10px; font-size:12px; font-weight:600; color:#007aff;">
-                📍 Voir sur Google Maps (${lat.toFixed(2)}, ${lon.toFixed(2)})
-            </div>
-        `;
+      <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#e3e3e8; border-radius:10px; font-size:12px; font-weight:600; color:#007aff;">
+          📍 Voir sur Google Maps (${Number(lat).toFixed(2)}, ${Number(lon).toFixed(2)})
+      </div>
+    `;
     p.appendChild(mapCard);
   } else {
     p.textContent = msg.content;
@@ -1114,7 +1090,69 @@ async function uploadMedia({
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-async function envoyerMessageBase({ content, type }) {
+async function envoyerGif({ gifUrl, title = "GIF" }) {
+  if (!currentConversationId || !currentUser) return;
+
+  const emptyPlaceholder = messagesContainer.querySelector(
+    ".chat-empty-messages",
+  );
+  if (emptyPlaceholder) emptyPlaceholder.remove();
+
+  const messageContent = title ? `🎞️ ${title}` : "🎞️ GIF";
+
+  const { data: message, error: msgError } = await client
+    .from("messages")
+    .insert({
+      conversation_id: currentConversationId,
+      sender_id: currentUser.id,
+      content: messageContent,
+      type: "gif",
+    })
+    .select()
+    .single();
+
+  if (msgError || !message) {
+    console.error("Erreur insertion message GIF :", msgError);
+    return;
+  }
+
+  const { error: attachError } = await client
+    .from("message_attachments")
+    .insert({
+      message_id: message.id,
+      external_url: gifUrl,
+      file_name: title || "giphy.gif",
+      mime_type: "image/gif",
+      file_size: 0,
+    });
+
+  if (attachError) {
+    console.error("Erreur insertion message_attachments GIF :", attachError);
+  }
+
+  const tempMsg = {
+    ...message,
+    message_reactions: [],
+    message_attachments: [
+      {
+        external_url: gifUrl,
+        storage_path: null,
+        file_name: title || "giphy.gif",
+        mime_type: "image/gif",
+        file_size: 0,
+      },
+    ],
+  };
+  messagesContainer.appendChild(creerBulleMessage(tempMsg, true));
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+async function envoyerMessageBase({
+  content,
+  type,
+  latitude = null,
+  longitude = null,
+}) {
   if (!currentConversationId || !currentUser) return;
 
   const emptyPlaceholder = messagesContainer.querySelector(
@@ -1126,20 +1164,30 @@ async function envoyerMessageBase({ content, type }) {
     sender_id: currentUser.id,
     content: content,
     type: type,
+    latitude: latitude,
+    longitude: longitude,
     created_at: new Date().toISOString(),
     message_reactions: [],
+    message_attachments: [],
   };
   messagesContainer.appendChild(creerBulleMessage(tempMsg, true));
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
   try {
-    await client.from("messages").insert({
+    const request = {
       conversation_id: currentConversationId,
       sender_id: currentUser.id,
       content: content,
       type: type,
-    });
-  } catch (error) {}
+    };
+    if (latitude !== null && longitude !== null) {
+      request.latitude = latitude;
+      request.longitude = longitude;
+    }
+    await client.from("messages").insert(request);
+  } catch (error) {
+    console.error("Erreur envoyerMessageBase :", error);
+  }
 }
 
 messageForm.addEventListener("submit", async (e) => {
