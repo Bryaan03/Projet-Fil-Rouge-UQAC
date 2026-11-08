@@ -383,22 +383,36 @@ if (gifSearchInput) {
 // --- ENREGISTREUR VOCAL ---
 let mediaRecorder = null;
 let audioChunks = [];
+let audioStream = null;
 let isRecording = false;
 
 if (btnMic) {
   btnMic.addEventListener("click", async () => {
     if (!isRecording) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
+        audioStream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
-        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder = new MediaRecorder(audioStream);
         audioChunks = [];
-        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
         mediaRecorder.onstop = async () => {
+          if (audioStream) {
+            audioStream.getTracks().forEach((track) => track.stop());
+            audioStream = null;
+          }
+
           const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          await envoyerMessageBase({ content: audioUrl, type: "audio" });
+
+          await uploadMedia({
+            fileOrBlob: audioBlob,
+            fileName: `vocal_${Date.now()}.webm`,
+            mimeType: "audio/webm",
+            type: "audio",
+            subfolder: "audios",
+          });
         };
         mediaRecorder.start();
         isRecording = true;
@@ -506,6 +520,16 @@ async function getMessages(conversationId) {
           message_id,
           user_id,
           emoji
+        ),
+        message_attachments (
+          id,
+          storage_path,
+          external_url,
+          file_name,
+          mime_type,
+          file_size,
+          width,
+          height
         )
       `)
       .eq("conversation_id", conversationId)
@@ -513,7 +537,45 @@ async function getMessages(conversationId) {
       .order("created_at", { ascending: true });
 
     if (error) return [];
-    return messages || [];
+    if (!messages) return [];
+
+    const attachmentPaths = [];
+    messages.forEach((msg) => {
+      if (msg.message_attachments) {
+        msg.message_attachments.forEach((att) => {
+          if (att.storage_path) attachmentPaths.push(att.storage_path);
+        });
+      }
+    });
+
+    if (attachmentPaths.length > 0) {
+      try {
+        const { data: signedList } = await client.storage
+          .from("chat-attachments")
+          .createSignedUrls(attachmentPaths, 3600);
+
+        if (signedList && signedList.length > 0) {
+          const signedMap = {};
+          signedList.forEach((item) => {
+            if (item.signedUrl) signedMap[item.path] = item.signedUrl;
+          });
+
+          messages.forEach((msg) => {
+            if (msg.message_attachments) {
+              msg.message_attachments.forEach((att) => {
+                if (signedMap[att.storage_path]) {
+                  att.signed_url = signedMap[att.storage_path];
+                }
+              });
+            }
+          });
+        }
+      } catch (errSign) {
+        console.warn("Erreur signature des fichiers :", errSign);
+      }
+    }
+
+    return messages;
   } catch (error) {
     return [];
   }
@@ -638,9 +700,16 @@ function creerBulleMessage(msg, isLastSent) {
     video.appendChild(source);
     p.appendChild(video);
   } else if (msg.type === "audio") {
+    const attachment =
+      msg.message_attachments && msg.message_attachments.length > 0
+        ? msg.message_attachments[0]
+        : null;
+    const audioUrl =
+      attachment?.signed_url || attachment?.external_url || msg.content;
+
     const audio = document.createElement("audio");
     audio.controls = true;
-    audio.src = msg.content;
+    audio.src = audioUrl;
     p.appendChild(audio);
   } else if (msg.type === "file") {
     const link = document.createElement("a");
@@ -814,6 +883,18 @@ function abonnerTempsReel(conversationId) {
         afficherMessages(messages, false);
       },
     )
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "message_attachments",
+      },
+      async () => {
+        const messages = await getMessages(conversationId);
+        afficherMessages(messages, false);
+      },
+    )
     .subscribe();
 }
 
@@ -932,6 +1013,106 @@ searchConvInput?.addEventListener("input", () => {
   );
   afficherConversations(filtered);
 });
+
+async function uploadMedia({
+  fileOrBlob,
+  fileName,
+  mimeType,
+  type,
+  subfolder = "files",
+}) {
+  if (!currentConversationId || !currentUser) return;
+
+  const emptyPlaceholder = messagesContainer.querySelector(
+    ".chat-empty-messages",
+  );
+  if (emptyPlaceholder) emptyPlaceholder.remove();
+
+  const fileExt = fileName.includes(".")
+    ? fileName.split(".").pop()
+    : type === "audio"
+      ? "webm"
+      : "bin";
+  const path = `${currentConversationId}/${subfolder}/${Date.now()}_${crypto.randomUUID()}.${fileExt}`;
+
+  const { error: uploadError } = await client.storage
+    .from("chat-attachments")
+    .upload(path, fileOrBlob, {
+      contentType: mimeType,
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (uploadError) {
+    console.error("Erreur Storage upload :", uploadError);
+    alert(
+      "Erreur lors du téléversement du fichier. Le fichier ne doit pas dépasser 50 Mo.",
+    );
+    return;
+  }
+
+  let signedUrl = "";
+  try {
+    const { data: signedData } = await client.storage
+      .from("chat-attachments")
+      .createSignedUrl(path, 3600);
+    if (signedData?.signedUrl) signedUrl = signedData.signedUrl;
+  } catch (e) {
+    console.error("Erreur création URL signée :", e);
+  }
+
+  let messageContent = fileName;
+  if (type === "audio") messageContent = "🎤 Message vocal";
+  else if (type === "image") messageContent = `📷 ${fileName}`;
+  else if (type === "video") messageContent = `📹 ${fileName}`;
+  else if (type === "file") messageContent = `📎 ${fileName}`;
+
+  const { data: insertedMsg, error: msgError } = await client
+    .from("messages")
+    .insert({
+      conversation_id: currentConversationId,
+      sender_id: currentUser.id,
+      content: messageContent,
+      type: type,
+    })
+    .select()
+    .single();
+
+  if (msgError || !insertedMsg) {
+    console.error("Erreur insertion messages :", msgError);
+    return;
+  }
+
+  const { error: attachError } = await client
+    .from("message_attachments")
+    .insert({
+      message_id: insertedMsg.id,
+      storage_path: path,
+      file_name: fileName,
+      mime_type: mimeType,
+      file_size: fileOrBlob.size || 0,
+    });
+
+  if (attachError) {
+    console.error("Erreur insertion message_attachments :", attachError);
+  }
+
+  const tempMsg = {
+    ...insertedMsg,
+    message_reactions: [],
+    message_attachments: [
+      {
+        storage_path: path,
+        signed_url: signedUrl,
+        file_name: fileName,
+        mime_type: mimeType,
+        file_size: fileOrBlob.size || 0,
+      },
+    ],
+  };
+  messagesContainer.appendChild(creerBulleMessage(tempMsg, true));
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
 
 async function envoyerMessageBase({ content, type }) {
   if (!currentConversationId || !currentUser) return;
