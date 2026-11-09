@@ -13,7 +13,7 @@ const AuthManager = {
     if (!this.client) {
       this.message.style.color = "#dc3545";
       this.message.textContent =
-        "Erreur : supabaseClient.js introuvable (vérifiez ../supabaseClient.js).";
+        "Erreur : supabaseClient.js introuvable (vérifiez ../js/supabaseClient.js).";
       return;
     }
 

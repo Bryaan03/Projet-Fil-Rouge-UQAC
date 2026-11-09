@@ -13,7 +13,7 @@ Une application web de messagerie instantanée en temps réel inspirée du desig
   - Enregistreur de messages vocaux intégré.
   - Recherche et envoi de GIFs animés (API Giphy).
   - Partage de position géographique GPS (Google Maps).
-- **Réactions** : Ajout d'émojis sur les messages (❤️, 👍, 😂, 😮, 😢).
+- **Réactions** : Ajout d'émojis sur les messages en double-clique (❤️, 👍, 😂, 😮, 😢).
 - **Annulation d'envoi** : Possibilité d'annuler un message envoyé.
 - 🌙 **Mode sombre** : Thème clair / sombre automatique avec persistance locale.
 
@@ -34,7 +34,6 @@ Une application web de messagerie instantanée en temps réel inspirée du desig
 
 ```text
 ├── index.html            # Page d'accueil (Connexion / Inscription)
-├── supabaseClient.js     # Configuration du client Supabase
 ├── html/
 │   ├── conversation.html # Interface principale de messagerie
 │   ├── contact.html      # Recherche et création de conversations
@@ -49,5 +48,7 @@ Une application web de messagerie instantanée en temps réel inspirée du desig
     ├── auth.js           # Logique de connexion / inscription
     ├── conversation.js   # Logique temps réel, chat et médias
     ├── contact.js        # Recherche d'utilisateurs
-    └── parametre.js      # Gestion du profil et du thème
+    ├── parametre.js      # Gestion du profil et du thème
+    └── supabaseClient.js # Configuration du client Supabase
+
 ```
