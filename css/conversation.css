@@ -298,7 +298,10 @@
   border-radius: 18px;
   font-size: 15px;
   line-height: 1.35;
-  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+  min-width: 0;
   position: relative;
   cursor: pointer;
   user-select: text;
@@ -726,4 +729,60 @@ body.dark-mode .chat-message.received {
   background-color: transparent;
   border: 1px solid var(--danger, #dc3545);
   color: var(--danger, #dc3545);
+}
+
+.chat-back-mobile-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #007aff;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  align-items: center;
+  gap: 2px;
+}
+
+@media (max-width: 768px) {
+  .chat-app-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chat-sidebar {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    border-right: none;
+  }
+
+  .chat-main {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .chat-app-container.conversation-open .chat-sidebar {
+    display: none;
+  }
+
+  .chat-app-container.conversation-open .chat-main {
+    display: flex;
+  }
+
+  .chat-back-mobile-btn {
+    display: inline-flex;
+    position: absolute;
+    left: 5px;
+    top: 0;
+    bottom: 0;
+  }
+
+  .chat-media-img,
+  .chat-media-video,
+  .chat-gps-preview {
+    max-width: 100%;
+  }
 }

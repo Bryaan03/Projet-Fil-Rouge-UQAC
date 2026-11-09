@@ -16,6 +16,8 @@ const btnSend = document.getElementById("btn-send");
 const btnMic = document.getElementById("btn-mic");
 const btnAttach = document.getElementById("btn-attach");
 const attachMenu = document.getElementById("chat-attach-menu");
+const btnBackConversations = document.getElementById("btn-back-conversations");
+const chatAppContainer = document.querySelector(".chat-app-container");
 
 // Éléments modale contact
 const customModal = document.getElementById("custom-contact-modal");
@@ -878,6 +880,8 @@ async function chargerConversation(conv) {
   currentConversationId = conv.id;
   currentActiveConv = conv;
 
+  chatAppContainer?.classList.add("conversation-open");
+
   chatTitle.textContent = conv.name;
   if (chatEditIcon) chatEditIcon.style.display = "inline";
   if (chatSubtitle) chatSubtitle.textContent = conv.status;
@@ -1223,5 +1227,17 @@ document.addEventListener("click", (e) => {
       .forEach((el) => el.remove());
   }
 });
+
+if (btnBackConversations) {
+  btnBackConversations.addEventListener("click", () => {
+    chatAppContainer?.classList.remove("conversation-open");
+    currentConversationId = null;
+    currentActiveConv = null;
+    document
+      .querySelectorAll(".chat-conversation-item")
+      .forEach((el) => el.classList.remove("active"));
+    window.history.replaceState({}, "", "conversation.html");
+  });
+}
 
 initialiser();

@@ -116,3 +116,9 @@
 .contact-item-link:hover {
   opacity: 0.9;
 }
+
+@media (max-width: 480px) {
+  .contact-form {
+    flex-direction: column;
+  }
+}
